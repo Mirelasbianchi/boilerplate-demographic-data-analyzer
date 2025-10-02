@@ -1,46 +1,64 @@
+# Importa a biblioteca pandas, que é usada para manipulação e análise de dados
 import pandas as pd
 
+# Define uma função que calcula diversas estatísticas demográficas a partir de um arquivo CSV
 def calculate_demographic_data(print_data=True):
-    # Read data from file
+    # Lê os dados do arquivo 'adult.data.csv' e armazena em um DataFrame do pandas
     df = pd.read_csv('adult.data.csv')  # substitua pelo caminho correto do CSV
 
-    # How many of each race are represented in this dataset? This should be a Pandas series with race names as the index labels.
+    # 1. Contagem de indivíduos por raça
+    # Usa value_counts() para contar quantas vezes cada valor aparece na coluna 'race'
+    # O resultado é uma série do pandas com as raças como índice e as contagens como valores
     race_count = df['race'].value_counts()
 
-    # What is the average age of men?
+    # 2. Idade média dos homens
+    # Primeiro filtra apenas os registros em que 'sex' é 'Male'
+    # Depois calcula a média da coluna 'age' e arredonda para 1 casa decimal
     average_age_men = round(df[df['sex'] == 'Male']['age'].mean(), 1)
 
-    # What is the percentage of people who have a Bachelor's degree?
+    # 3. Percentual de pessoas com grau de Bachelors
+    # Compara cada valor da coluna 'education' com 'Bachelors', obtendo True/False
+    # Calcula a média desses valores booleanos (True=1, False=0) e multiplica por 100
+    # Arredonda para 1 casa decimal
     percentage_bachelors = round((df['education'] == 'Bachelors').mean() * 100, 1)
 
-    # What percentage of people with advanced education (`Bachelors`, `Masters`, or `Doctorate`) make more than 50K?
-    # What percentage of people without advanced education make more than 50K?
-
-    # with and without `Bachelors`, `Masters`, or `Doctorate`
+    # 4. Percentual de pessoas com educação avançada que ganham >50K
+    # Educação avançada inclui Bachelors, Masters e Doctorate
     higher_education = df[df['education'].isin(['Bachelors', 'Masters', 'Doctorate'])]
+    # Pessoas sem educação avançada
     lower_education = df[~df['education'].isin(['Bachelors', 'Masters', 'Doctorate'])]
 
-    # percentage with salary >50K
+    # Percentual de pessoas com educação avançada que ganham mais de 50K
     higher_education_rich = round((higher_education['salary'] == '>50K').mean() * 100, 1)
+    # Percentual de pessoas sem educação avançada que ganham mais de 50K
     lower_education_rich = round((lower_education['salary'] == '>50K').mean() * 100, 1)
 
-    # What is the minimum number of hours a person works per week (hours-per-week feature)?
+    # 5. Número mínimo de horas trabalhadas por semana
+    # Usa min() para encontrar o menor valor na coluna 'hours-per-week'
     min_work_hours = df['hours-per-week'].min()
 
-    # What percentage of the people who work the minimum number of hours per week have a salary of >50K?
+    # 6. Percentual de pessoas que trabalham o mínimo de horas e ganham >50K
+    # Filtra os indivíduos que trabalham o mínimo de horas
     num_min_workers = df[df['hours-per-week'] == min_work_hours]
+    # Calcula o percentual desses indivíduos que têm salário >50K
     rich_percentage = round((num_min_workers['salary'] == '>50K').mean() * 100, 1)
 
-    # What country has the highest percentage of people that earn >50K?
+    # 7. País com maior percentual de pessoas que ganham >50K
+    # Filtra as pessoas que ganham >50K, conta por país, e divide pela contagem total de pessoas por país
+    # Multiplica por 100 para obter percentual
     country_salary = (df[df['salary'] == '>50K']['native-country'].value_counts() /
                       df['native-country'].value_counts() * 100)
+    # Identifica o país com maior percentual
     highest_earning_country = country_salary.idxmax()
+    # Percentual correspondente ao país
     highest_earning_country_percentage = round(country_salary.max(), 1)
 
-    # Identify the most popular occupation for those who earn >50K in India.
+    # 8. Ocupação mais popular entre os que ganham >50K na Índia
+    # Filtra pessoas com 'native-country' igual a 'India' e salário >50K
+    # Usa mode() para encontrar a ocupação mais frequente e pega o primeiro valor
     top_IN_occupation = df[(df['native-country'] == 'India') & (df['salary'] == '>50K')]['occupation'].mode()[0]
 
-    # DO NOT MODIFY BELOW THIS LINE
+    # Exibe os resultados, caso print_data seja True
     if print_data:
         print("Number of each race:\n", race_count) 
         print("Average age of men:", average_age_men)
@@ -53,6 +71,7 @@ def calculate_demographic_data(print_data=True):
         print(f"Highest percentage of rich people in country: {highest_earning_country_percentage}%")
         print("Top occupations in India:", top_IN_occupation)
 
+    # Retorna os resultados em um dicionário
     return {
         'race_count': race_count,
         'average_age_men': average_age_men,
